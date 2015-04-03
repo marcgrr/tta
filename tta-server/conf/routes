@@ -1,1 +1,4 @@
 GET     /                       controllers.Index.index()
+
+GET     /gamestate              controllers.GameState.get()
+POST    /gamestate              controllers.GameState.action()
