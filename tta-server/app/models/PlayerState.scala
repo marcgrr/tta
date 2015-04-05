@@ -7,7 +7,9 @@ import scala.collection.immutable
 
 case class PlayerState(
     buildings: immutable.Seq[Building],
-    ore: Int)
+    researchedBuildings: immutable.Seq[Building],
+    ore: Int,
+    food: Int)
 
 object PlayerState {
   implicit val format: OFormat[PlayerState] = Json.format[PlayerState]
