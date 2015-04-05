@@ -16,25 +16,40 @@ object Building {
   implicit val format: Format[Building] = {
     val writes = Writes { o: Building => JsString(o.prettyName) }
     val reads = Reads { json => JsSuccess(Bronze(0) : Building) }
+    //TODO: Make it read something sensible
     Format(reads, writes)
   }
 
-  def canBuild(building: Building, gameState: GameState) : Boolean = {
+  private def canBuild(building: Building, gameState: GameState) : Boolean = {
     gameState.activePlayerState.ore >= building.costToBuild &&
       gameState.activePlayerState.population >= 1
   }
 
-  def generateBuildAction(building: Building): Action = new Action {
-    override def doIt(gameState: GameState): GameState = {
-      gameState.updatedActivePlayerState ( playerState =>
-        playerState.copy(
-          buildings = playerState.buildings :+ building,
-          population = playerState.population - 1,
-          ore = playerState.ore - building.costToBuild)
-      )
+  def generateBuildActionDerivedPlayerState(building: Building, gameState: GameState): DerivedPlayerState = {
+    val actions: Map[ActionId, Action] = {
+      if (Building.canBuild(building, gameState)) {
+        val buildAction: Action = new Action {
+          override def doIt(gameState: GameState): GameState = {
+            gameState.updatedActivePlayerState(playerState =>
+              playerState.copy(
+                buildings = playerState.buildings :+ building,
+                population = playerState.population - 1,
+                ore = playerState.ore - building.costToBuild)
+            )
+          }
+        }
+        Map(ActionId("build" + building.prettyName) -> buildAction)
+      }
+      else {
+        Map.empty
+      }
     }
 
+    DerivedPlayerState.empty.copy(
+      actions = actions
+    )
   }
+
 }
 
 trait Mine

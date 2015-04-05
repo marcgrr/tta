@@ -16,6 +16,10 @@ import play.api.mvc.Controller
 @Singleton
 class GameStateResource @Inject() () extends Controller {
 
+  def derivedGameState = Logic.deriveGameState(gameState)
+  def activePlayerState = gameState.activePlayerState
+  def activePlayerDerivedState = derivedGameState.derivedPlayerStates(gameState.activePlayerIndex)
+
   var gameState = GameState(
     PlayerIndex(0),
     Map(
@@ -30,16 +34,12 @@ class GameStateResource @Inject() () extends Controller {
 
   def runAction(actionIdString: String) = Action {
     val actionId = ActionId(actionIdString)
-    val derivedGameState = Logic.deriveGameState(gameState)
-    val action = derivedGameState.actions(actionId)
+    val action = activePlayerDerivedState.actions(actionId)
     gameState = action.doIt(gameState)
     Ok(makeResponse(gameState))
   }
 
   def endTurn = Action {
-    val activePlayerState = gameState.activePlayerState
-    val derivedGameState = Logic.deriveGameState(gameState)
-    val activePlayerDerivedState = derivedGameState.derivedPlayerStates(gameState.activePlayerIndex)
 
     val newActivePlayerState = Logic.updatePlayerStateAtEndOfTurn(activePlayerState, activePlayerDerivedState)
 

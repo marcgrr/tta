@@ -7,26 +7,7 @@ import scala.collection.immutable
 object Logic {
   
   def deriveGameState(gameState: GameState): DerivedGameState = {
-
-    // Generate valid building actions from researchedBuildings
-    val buildActionMap = {
-      for (researchedBuilding <- gameState.activePlayerState.researchedBuildings; if Building.canBuild(researchedBuilding, gameState))
-        yield ActionId("build" + researchedBuilding.prettyName) -> Building.generateBuildAction(researchedBuilding)
-    }.toMap
-
-    // Generate increase population action, if valid
-    val increasePopulationActionMap = {
-      if (Population.canIncrease(gameState))
-        Map(ActionId("increasePopulation") -> Population.generateIncreasePopulationAction)
-      else
-        Map()
-    }
-
-    // Pool together all valid actions
-    val allowedActions = buildActionMap ++ increasePopulationActionMap
-
     DerivedGameState(
-      actions = allowedActions,
       derivedPlayerStates = gameState.playerStates.map { case (playerIndex, _) =>
         playerIndex -> derivePlayerState(playerIndex, gameState)
       })
@@ -35,9 +16,19 @@ object Logic {
   def derivePlayerState(playerIndex: PlayerIndex, gameState: GameState): DerivedPlayerState = {
     val playerState = gameState.playerStates(playerIndex)
 
+    // Generate valid building actions from researchedBuildings
+    val buildActionDerivedPlayerStates = {
+      for (researchedBuilding <- gameState.activePlayerState.researchedBuildings)
+        yield Building.generateBuildActionDerivedPlayerState(researchedBuilding, gameState)
+    }.toList
+
+    // Generate increase population action, if valid
+    val increasePopulationDerivedPlayerStates = List(Population.generateIncreasePopulationActionDerivedPlayerState(gameState))
+
+    // Calculate resource gains from buildings you've already built
     val buildingEffects = playerState.buildings.map(_.derivePlayerState(gameState))
 
-    val allEffects = buildingEffects
+    val allEffects = buildActionDerivedPlayerStates ++ increasePopulationDerivedPlayerStates ++ buildingEffects
 
     allEffects.fold(DerivedPlayerState.empty)(_ + _)
   }

@@ -11,14 +11,19 @@ trait Action {
 }
 
 object Action {
+  //TODO: actually make this write and read something sensible
   implicit val format: OFormat[Action] = {
     val writes = OWrites { action: Action =>
       Json.obj("This is an" -> "action")
     }
     val reads = Reads { _ =>
-      JsSuccess(Building.generateBuildAction(Bronze(0)) : Action)
+      JsSuccess(empty)
     }
     OFormat(reads, writes)
+  }
+
+  val empty: Action = new Action {
+    def doIt(gameState: GameState): GameState = gameState
   }
 }
 

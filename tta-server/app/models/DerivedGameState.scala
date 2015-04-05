@@ -10,7 +10,6 @@ import play.api.libs.json.Reads
 import scala.collection.immutable
 
 case class DerivedGameState(
-    actions: Map[ActionId, Action],
     derivedPlayerStates: Map[PlayerIndex, DerivedPlayerState])
 
 object DerivedGameState {
