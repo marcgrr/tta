@@ -4,7 +4,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 import logic.Logic
-import models._
+import models.ActionId
+import models.Bronze
+import models.GameState
+import models.PlayerIndex
+import models.PlayerState
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -18,14 +22,10 @@ class GameStateResource @Inject() () extends Controller {
     Map(
       PlayerIndex(0) -> PlayerState(
         buildings = List(Bronze(0)),
-        researchedBuildings = List(Bronze(0), Iron(0), Agriculture(0)),
-        ore = 0,
-        food = 0),
+        ore = 0),
       PlayerIndex(1) -> PlayerState(
         buildings = List(Bronze(0)),
-        researchedBuildings = List(Bronze(0), Iron(0), Agriculture(0)),
-        ore = 0,
-        food = 0)))
+        ore = 0)))
 
   def get = Action {
     Ok(makeResponse(gameState))
