@@ -24,12 +24,14 @@ object Building {
       gameState.updatedActivePlayerState ( playerState =>
         playerState.copy(
           buildings = playerState.buildings :+ building,
+          population = playerState.population - 1,
           ore = playerState.ore - building.costToBuild)
       )
     }
 
     override def isValid(gameState: GameState): Boolean = {
-      gameState.activePlayerState.ore >= building.costToBuild
+      gameState.activePlayerState.ore >= building.costToBuild &&
+      gameState.activePlayerState.population >= 1
     }
   }
 }

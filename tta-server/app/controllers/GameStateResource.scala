@@ -16,16 +16,10 @@ class GameStateResource @Inject() () extends Controller {
   var gameState = GameState(
     PlayerIndex(0),
     Map(
-      PlayerIndex(0) -> PlayerState(
-        buildings = List(Bronze(0)),
-        researchedBuildings = List(Bronze(0), Iron(0), Agriculture(0)),
-        ore = 0,
-        food = 0),
-      PlayerIndex(1) -> PlayerState(
-        buildings = List(Bronze(0)),
-        researchedBuildings = List(Bronze(0), Iron(0), Agriculture(0)),
-        ore = 0,
-        food = 0)))
+      PlayerIndex(0) -> PlayerState.newPlayerState,
+      PlayerIndex(1) -> PlayerState.newPlayerState
+    )
+  )
 
   def get = Action {
     Ok(makeResponse(gameState))

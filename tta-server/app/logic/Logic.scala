@@ -7,13 +7,17 @@ import scala.collection.immutable
 object Logic {
   
   def deriveGameState(gameState: GameState): DerivedGameState = {
-    val defaultCandidateActionMap = gameState.activePlayerState.researchedBuildings.map (
+    val buildCandidateActionMap = gameState.activePlayerState.researchedBuildings.map (
       building => {
         ActionId("build" + building.prettyName) -> Building.generateBuildAction(building)
       } //why does flatMap have an error here?
     ).toMap
 
-    val allowedActions = defaultCandidateActionMap.filter { case (index, action)=>
+    val increasePopulationCandidateActionMap = Map(ActionId("increasePopulation") -> Population.generateIncreasePopulationAction(gameState.activePlayerState))
+
+    val candidateActionMap = buildCandidateActionMap ++ increasePopulationCandidateActionMap
+
+    val allowedActions = candidateActionMap.filter { case (index, action)=>
       action.isValid(gameState)
     }
 
