@@ -1,32 +1,28 @@
 package logic
 
-import models.Action
-import models.ActionId
-import models.Bronze
-import models.BuildBronze
-import models.DerivedGameState
-import models.DerivedPlayerState
-import models.GameState
-import models.PlayerIndex
-import models.PlayerState
+import models._
 
 import scala.collection.immutable
 
 object Logic {
   
   def deriveGameState(gameState: GameState): DerivedGameState = {
-    val defaultCandidateActions: immutable.Seq[Action] = List(BuildBronze)
+    val defaultCandidateActionMap = gameState.activePlayerState.researchedBuildings.map (
+      building => {
+        ActionId("build" + building.prettyName) -> Building.generateBuildAction(building)
+      } //why does flatMap have an error here?
+    ).toMap
 
-    val allowedActions = defaultCandidateActions.filter { action =>
+    val allowedActions = defaultCandidateActionMap.filter { case (index, action)=>
       action.isValid(gameState)
     }
-
+/*
     val indexedActions = allowedActions.zip(0 to allowedActions.size).map { case (action, index) =>
       ActionId(index.toString) -> action
     }.toMap
-    
+  */
     DerivedGameState(
-      actions = indexedActions,
+      actions = allowedActions,
       derivedPlayerStates = gameState.playerStates.map { case (playerIndex, _) =>
         playerIndex -> derivePlayerState(playerIndex, gameState)
       })
@@ -45,7 +41,10 @@ object Logic {
   def updatePlayerStateAtEndOfTurn(
       playerState: PlayerState,
       derivedPlayerState: DerivedPlayerState): PlayerState = {
-    playerState.copy(ore = playerState.ore + derivedPlayerState.orePerTurn)
+    playerState.copy(
+      ore = playerState.ore + derivedPlayerState.orePerTurn,
+      food = playerState.food + derivedPlayerState.foodPerTurn
+    )
   }
 
 }
