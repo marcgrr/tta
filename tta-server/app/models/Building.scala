@@ -19,6 +19,11 @@ object Building {
     Format(reads, writes)
   }
 
+  def canBuild(building: Building, gameState: GameState) : Boolean = {
+    gameState.activePlayerState.ore >= building.costToBuild &&
+      gameState.activePlayerState.population >= 1
+  }
+
   def generateBuildAction(building: Building): Action = new Action {
     override def doIt(gameState: GameState): GameState = {
       gameState.updatedActivePlayerState ( playerState =>
@@ -29,10 +34,6 @@ object Building {
       )
     }
 
-    override def isValid(gameState: GameState): Boolean = {
-      gameState.activePlayerState.ore >= building.costToBuild &&
-      gameState.activePlayerState.population >= 1
-    }
   }
 }
 

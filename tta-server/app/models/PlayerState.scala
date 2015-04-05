@@ -19,6 +19,5 @@ object PlayerState {
       researchedBuildings = List(Bronze(0), Iron(0), Agriculture(0)),
       ore = 0,
       food = 0,
-      population = 1
-  )
+      population = 1)
 }

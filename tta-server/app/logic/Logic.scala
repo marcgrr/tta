@@ -7,19 +7,23 @@ import scala.collection.immutable
 object Logic {
   
   def deriveGameState(gameState: GameState): DerivedGameState = {
-    val buildCandidateActionMap = gameState.activePlayerState.researchedBuildings.map (
-      building => {
-        ActionId("build" + building.prettyName) -> Building.generateBuildAction(building)
-      } //why does flatMap have an error here?
-    ).toMap
 
-    val increasePopulationCandidateActionMap = Map(ActionId("increasePopulation") -> Population.generateIncreasePopulationAction(gameState.activePlayerState))
+    // Generate valid building actions from researchedBuildings
+    val buildActionMap = {
+      for (researchedBuilding <- gameState.activePlayerState.researchedBuildings; if Building.canBuild(researchedBuilding, gameState))
+        yield ActionId("build" + researchedBuilding.prettyName) -> Building.generateBuildAction(researchedBuilding)
+    }.toMap
 
-    val candidateActionMap = buildCandidateActionMap ++ increasePopulationCandidateActionMap
-
-    val allowedActions = candidateActionMap.filter { case (index, action)=>
-      action.isValid(gameState)
+    // Generate increase population action, if valid
+    val increasePopulationActionMap = {
+      if (Population.canIncrease(gameState))
+        Map(ActionId("increasePopulation") -> Population.generateIncreasePopulationAction)
+      else
+        Map()
     }
+
+    // Pool together all valid actions
+    val allowedActions = buildActionMap ++ increasePopulationActionMap
 
     DerivedGameState(
       actions = allowedActions,
@@ -41,10 +45,9 @@ object Logic {
   def updatePlayerStateAtEndOfTurn(
       playerState: PlayerState,
       derivedPlayerState: DerivedPlayerState): PlayerState = {
-    playerState.copy(
-      ore = playerState.ore + derivedPlayerState.orePerTurn,
-      food = playerState.food + derivedPlayerState.foodPerTurn
-    )
+        playerState.copy(
+          ore = playerState.ore + derivedPlayerState.orePerTurn,
+          food = playerState.food + derivedPlayerState.foodPerTurn)
   }
 
 }

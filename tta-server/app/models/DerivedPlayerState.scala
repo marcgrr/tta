@@ -12,8 +12,7 @@ case class DerivedPlayerState(
   def +(other: DerivedPlayerState): DerivedPlayerState = {
     DerivedPlayerState(
       orePerTurn + other.orePerTurn,
-      foodPerTurn + other.foodPerTurn
-    )
+      foodPerTurn + other.foodPerTurn)
   }
 
 }

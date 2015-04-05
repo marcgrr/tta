@@ -8,7 +8,6 @@ import play.api.libs.json.Reads
 
 trait Action {
   def doIt(gameState: GameState): GameState
-  def isValid(gameState: GameState): Boolean
 }
 
 object Action {
