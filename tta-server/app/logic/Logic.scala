@@ -16,11 +16,7 @@ object Logic {
     val allowedActions = defaultCandidateActionMap.filter { case (index, action)=>
       action.isValid(gameState)
     }
-/*
-    val indexedActions = allowedActions.zip(0 to allowedActions.size).map { case (action, index) =>
-      ActionId(index.toString) -> action
-    }.toMap
-  */
+
     DerivedGameState(
       actions = allowedActions,
       derivedPlayerStates = gameState.playerStates.map { case (playerIndex, _) =>
