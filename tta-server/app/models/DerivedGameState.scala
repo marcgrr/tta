@@ -14,39 +14,6 @@ case class DerivedGameState(
     derivedPlayerStates: Map[PlayerIndex, DerivedPlayerState])
 
 object DerivedGameState {
-  private implicit val actions: OFormat[Map[ActionId, Action]] = {
-    val writes = OWrites { o: Map[ActionId, Action] =>
-      o.toList.foldLeft(Json.obj()) { case (json, (actionId, action)) =>
-        json ++ Json.obj(actionId.id -> action)
-      }
-    }
-    val reads = Reads { json =>
-      // TODO: Validate correctly.
-      json.validate[JsObject].map { jsObject =>
-        jsObject.value.map { case (string, jsValue) =>
-          ActionId(string) -> jsValue.as[Action]
-        }.toMap
-      }
-    }
-    OFormat(reads, writes)
-  }
-
-  private implicit val playersFormat: OFormat[Map[PlayerIndex, DerivedPlayerState]] = {
-    val writes = OWrites { o: Map[PlayerIndex, DerivedPlayerState] =>
-      o.toList.foldLeft(Json.obj()) { case (json, (playerIndex, derivedPlayerState)) =>
-        json ++ Json.obj(playerIndex.index.toString -> derivedPlayerState)
-      }
-    }
-    val reads = Reads { json =>
-      // TODO: Validate correctly.
-      json.validate[JsObject].map { jsObject =>
-        jsObject.value.map { case (string, jsValue) =>
-          PlayerIndex(string.toInt) -> jsValue.as[DerivedPlayerState]
-        }.toMap
-      }
-    }
-    OFormat(reads, writes)
-  }
-
+  import util.JsonFormats.Implicits.mapFormat
   implicit val format: OFormat[DerivedGameState] = Json.format[DerivedGameState]
 }

@@ -23,22 +23,6 @@ case class GameState(
 }
 
 object GameState {
-  private implicit val playersFormat: OFormat[Map[PlayerIndex, PlayerState]] = {
-    val writes = OWrites { o: Map[PlayerIndex, PlayerState] =>
-      o.toList.foldLeft(Json.obj()) { case (json, (playerIndex, playerState)) =>
-        json ++ Json.obj(playerIndex.index.toString -> playerState)
-      }
-    }
-    val reads = Reads { json =>
-      // TODO: Validate correctly.
-      json.validate[JsObject].map { jsObject =>
-        jsObject.value.map { case (string, jsValue) =>
-          PlayerIndex(string.toInt) -> jsValue.as[PlayerState]
-        }.toMap
-      }
-    }
-    OFormat(reads, writes)
-  }
-
+  import util.JsonFormats.Implicits.mapFormat
   implicit val format: OFormat[GameState] = Json.format[GameState]
 }
