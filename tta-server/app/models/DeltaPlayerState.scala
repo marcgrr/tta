@@ -21,7 +21,7 @@ object DeltaPlayerState {
     PlayerState(
       buildings = playerState.buildings ++ deltaPlayerState.newBuildings,
       techs = playerState.techs ++ deltaPlayerState.newTechs,
-      civilHand = playerState.civilHand ++ deltaPlayerState.newCivilHand diff deltaPlayerState.removedCivilHand,
+      civilHand = (playerState.civilHand ++ deltaPlayerState.newCivilHand) diff deltaPlayerState.removedCivilHand,
       population = playerState.population + deltaPlayerState.population,
       ore = playerState.ore + deltaPlayerState.ore,
       food = playerState.food + deltaPlayerState.food,
