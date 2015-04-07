@@ -4,10 +4,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 import logic.Logic
-import models.ActionId
-import models.GameState
-import models.PlayerIndex
-import models.PlayerState
+import models._
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -35,7 +32,7 @@ class GameStateResource @Inject() () extends Controller {
   def runAction(actionIdString: String) = Action {
     val actionId = ActionId(actionIdString)
     val action = activePlayerDerivedState.actions(actionId)
-    gameState = action.doIt(gameState)
+    gameState = gameState.updatedActivePlayerState(DeltaPlayerState.applyDeltaPlayerState(action.doIt(gameState)))
     Ok(makeResponse(gameState))
   }
 

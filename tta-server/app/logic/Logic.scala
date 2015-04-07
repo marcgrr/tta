@@ -16,10 +16,16 @@ object Logic {
   def derivePlayerState(playerIndex: PlayerIndex, gameState: GameState): DerivedPlayerState = {
     val playerState = gameState.playerStates(playerIndex)
 
-    // Generate valid building actions from researchedBuildings
-    val buildActionDerivedPlayerStates = {
-      for (researchedBuilding <- gameState.activePlayerState.researchedBuildings)
-        yield Building.generateBuildActionDerivedPlayerState(researchedBuilding, gameState)
+    // Generate valid DerivedPlayerStates from civil cards in hand
+    val civilHandDerivedPlayerStates = {
+      for (card <- gameState.activePlayerState.civilHand)
+        yield card.generatePlayActionDerivedPlayerState(gameState)
+    }.toList
+
+    // Generate valid DerivedPlayerStates from techs that have been researched
+    val techsDerivedPlayerStates = {
+      for (tech <- gameState.activePlayerState.techs)
+        yield tech.generateResearchedDerivedPlayerState(gameState)
     }.toList
 
     // Generate increase population action, if valid
@@ -28,7 +34,8 @@ object Logic {
     // Calculate resource gains from buildings you've already built
     val buildingEffects = playerState.buildings.map(_.derivePlayerState(gameState))
 
-    val allEffects = buildActionDerivedPlayerStates ++ increasePopulationDerivedPlayerStates ++ buildingEffects
+    // Pool everything together
+    val allEffects = civilHandDerivedPlayerStates ++ techsDerivedPlayerStates ++ increasePopulationDerivedPlayerStates ++ buildingEffects
 
     allEffects.fold(DerivedPlayerState.empty)(_ + _)
   }
@@ -38,7 +45,8 @@ object Logic {
       derivedPlayerState: DerivedPlayerState): PlayerState = {
         playerState.copy(
           ore = playerState.ore + derivedPlayerState.orePerTurn,
-          food = playerState.food + derivedPlayerState.foodPerTurn)
+          food = playerState.food + derivedPlayerState.foodPerTurn,
+          science = playerState.science + derivedPlayerState.sciencePerTurn)
   }
 
 }

@@ -6,10 +6,12 @@ import play.api.libs.json.JsSuccess
 import play.api.libs.json.Reads
 import play.api.libs.json.Writes
 
-trait Building {
-  def prettyName: String
+trait Building extends Card with Tech {
   def derivePlayerState(gameState: GameState): DerivedPlayerState
   def costToBuild: Int
+  override def generateResearchedDerivedPlayerState(gameState: GameState): DerivedPlayerState =
+    Building.generateResearchedDerivedPlayerState(this, gameState)
+
 }
 
 object Building {
@@ -25,18 +27,15 @@ object Building {
       gameState.activePlayerState.population >= 1
   }
 
-  def generateBuildActionDerivedPlayerState(building: Building, gameState: GameState): DerivedPlayerState = {
+  def generateResearchedDerivedPlayerState(building: Building, gameState: GameState): DerivedPlayerState = {
     val actions: Map[ActionId, Action] = {
       if (Building.canBuild(building, gameState)) {
         val buildAction: Action = new Action {
-          override def doIt(gameState: GameState): GameState = {
-            gameState.updatedActivePlayerState(playerState =>
-              playerState.copy(
-                buildings = playerState.buildings :+ building,
-                population = playerState.population - 1,
-                ore = playerState.ore - building.costToBuild)
-            )
-          }
+          override def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty.copy(
+            newBuildings = List(building),
+            population = -1,
+            ore = -building.costToBuild
+          )
         }
         Map(ActionId("build" + building.prettyName) -> buildAction)
       }
@@ -58,6 +57,7 @@ case class Bronze(foo: Int) extends Building with Mine {
 
   override val prettyName = "Bronze"
   override val costToBuild: Int = 2
+  override val costToResearch: Int = 0
 
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(orePerTurn = 1)
@@ -68,6 +68,7 @@ case class Iron(foo: Int) extends Building with Mine {
 
   override val prettyName = "Iron"
   override val costToBuild: Int = 5
+  override val costToResearch: Int = 5
 
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(orePerTurn = 2)
@@ -81,8 +82,22 @@ case class Agriculture(foo: Int) extends Building with Farm {
 
   override val prettyName = "Agriculture"
   override val costToBuild: Int = 2
+  override val costToResearch: Int = 0
 
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(foodPerTurn = 1)
+  }
+}
+
+
+trait Lab
+
+case class Philosophy(foo: Int) extends Building with Lab {
+  override val prettyName = "Philosophy"
+  override val costToBuild: Int = 3
+  override val costToResearch: Int = 0
+
+  def derivePlayerState(gameState: GameState): DerivedPlayerState = {
+    DerivedPlayerState.empty.copy(sciencePerTurn = 1)
   }
 }
