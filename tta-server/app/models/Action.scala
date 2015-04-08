@@ -7,41 +7,23 @@ import play.api.libs.json.OWrites
 import play.api.libs.json.Reads
 
 trait Action {
-  def doIt(gameState: GameState): GameState
-  def isValid(gameState: GameState): Boolean
+  def doIt(gameState: GameState): DeltaPlayerState
 }
 
 object Action {
+  //TODO: actually make this write and read something sensible
   implicit val format: OFormat[Action] = {
     val writes = OWrites { action: Action =>
-      Json.obj("this is a" -> "placeholder")
+      Json.obj("This is an" -> "action")
     }
     val reads = Reads { _ =>
-      JsSuccess(BuildBronze : Action)
+      JsSuccess(empty)
     }
     OFormat(reads, writes)
   }
-}
 
-trait BuildBuilding extends Action {
-  val cost: Int
-  val building: Building
-
-  override def doIt(gameState: GameState): GameState = {
-    gameState.updatedActivePlayerState { playerState =>
-      playerState.copy(
-        buildings = playerState.buildings :+ building,
-        ore = playerState.ore - cost)
-    }
-  }
-
-  override def isValid(gameState: GameState): Boolean = {
-    gameState.activePlayerState.ore >= cost
+  val empty: Action = new Action {
+    def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty
   }
 }
 
-// TODO: Abstract bronze.
-case object BuildBronze extends Action with BuildBuilding {
-  override val cost: Int = 2
-  override val building: Building = Bronze(0)
-}

@@ -6,17 +6,29 @@ import play.api.libs.json.OFormat
 import scala.collection.immutable
 
 case class DerivedPlayerState(
-    orePerTurn: Int) {
+    actions: Map[ActionId, Action],
+    orePerTurn: Int,
+    foodPerTurn: Int,
+    sciencePerTurn: Int) {
 
   def +(other: DerivedPlayerState): DerivedPlayerState = {
-    DerivedPlayerState(orePerTurn + other.orePerTurn)
+    DerivedPlayerState(
+      actions = actions ++ other.actions,
+      orePerTurn = orePerTurn + other.orePerTurn,
+      foodPerTurn = foodPerTurn + other.foodPerTurn,
+      sciencePerTurn = sciencePerTurn + other.sciencePerTurn)
+    //TODO we should either validate that actions never clash, or figure out how to combine them
   }
 
 }
 
 object DerivedPlayerState {
+  import util.JsonFormats.Implicits.mapFormat
   implicit val format: OFormat[DerivedPlayerState] = Json.format[DerivedPlayerState]
 
   val empty: DerivedPlayerState = DerivedPlayerState(
-    orePerTurn = 0)
+    actions = Map.empty,
+    orePerTurn = 0,
+    foodPerTurn = 0,
+    sciencePerTurn = 0)
 }

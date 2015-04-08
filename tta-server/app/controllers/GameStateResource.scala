@@ -5,10 +5,11 @@ import javax.inject.Singleton
 
 import logic.Logic
 import models.ActionId
-import models.Bronze
+import models.DeltaPlayerState
 import models.GameState
 import models.PlayerIndex
 import models.PlayerState
+
 import play.api.libs.json.JsValue
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -17,15 +18,15 @@ import play.api.mvc.Controller
 @Singleton
 class GameStateResource @Inject() () extends Controller {
 
+  def derivedGameState = Logic.deriveGameState(gameState)
+  def activePlayerState = gameState.activePlayerState
+  def activePlayerDerivedState = derivedGameState.derivedPlayerStates(gameState.activePlayerIndex)
+
   var gameState = GameState(
     PlayerIndex(0),
     Map(
-      PlayerIndex(0) -> PlayerState(
-        buildings = List(Bronze(0)),
-        ore = 0),
-      PlayerIndex(1) -> PlayerState(
-        buildings = List(Bronze(0)),
-        ore = 0)))
+      PlayerIndex(0) -> PlayerState.newPlayerState,
+      PlayerIndex(1) -> PlayerState.newPlayerState))
 
   def get = Action {
     Ok(makeResponse(gameState))
@@ -33,16 +34,12 @@ class GameStateResource @Inject() () extends Controller {
 
   def runAction(actionIdString: String) = Action {
     val actionId = ActionId(actionIdString)
-    val derivedGameState = Logic.deriveGameState(gameState)
-    val action = derivedGameState.actions(actionId)
-    gameState = action.doIt(gameState)
+    val action = activePlayerDerivedState.actions(actionId)
+    gameState = gameState.updatedActivePlayerState(DeltaPlayerState.applyDeltaPlayerState(action.doIt(gameState)))
     Ok(makeResponse(gameState))
   }
 
   def endTurn = Action {
-    val activePlayerState = gameState.activePlayerState
-    val derivedGameState = Logic.deriveGameState(gameState)
-    val activePlayerDerivedState = derivedGameState.derivedPlayerStates(gameState.activePlayerIndex)
 
     val newActivePlayerState = Logic.updatePlayerStateAtEndOfTurn(activePlayerState, activePlayerDerivedState)
 
