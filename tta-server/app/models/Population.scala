@@ -18,19 +18,15 @@ object Population {
         val increasePopulationAction: Action = new Action {
           override def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty.copy(
             population = 1,
-            food = -costToIncrease(gameState)
-          )
+            food = -costToIncrease(gameState))
         }
         Map(ActionId("increasePopulation") -> increasePopulationAction)
-      }
-      else {
+      } else {
         Map.empty
       }
     }
 
-    DerivedPlayerState.empty.copy(
-      actions = actions
-    )
+    DerivedPlayerState.empty.copy(actions = actions)
   }
 
 }

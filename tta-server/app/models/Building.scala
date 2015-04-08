@@ -6,12 +6,33 @@ import play.api.libs.json.JsSuccess
 import play.api.libs.json.Reads
 import play.api.libs.json.Writes
 
-trait Building extends Card with Tech {
+trait Building extends Tech {
   def derivePlayerState(gameState: GameState): DerivedPlayerState
   def costToBuild: Int
-  override def generateResearchedDerivedPlayerState(gameState: GameState): DerivedPlayerState =
-    Building.generateResearchedDerivedPlayerState(this, gameState)
 
+  private def canBuild(gameState: GameState): Boolean = {
+    gameState.activePlayerState.ore >= this.costToBuild &&
+      gameState.activePlayerState.population >= 1
+  }
+
+  override def generateResearchedDerivedPlayerState(gameState: GameState): DerivedPlayerState = {
+    def building = this
+    val actions: Map[ActionId, Action] = {
+      if (building.canBuild(gameState)) {
+        val buildAction: Action = new Action {
+          override def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty.copy(
+            newBuildings = List(building),
+            population = -1,
+            ore = -building.costToBuild)
+        }
+        Map(ActionId("build" + this.prettyName) -> buildAction)
+      } else {
+        Map.empty
+      }
+    }
+
+    DerivedPlayerState.empty.copy(actions = actions)
+  }
 }
 
 object Building {
@@ -21,34 +42,6 @@ object Building {
     //TODO: Make it read something sensible
     Format(reads, writes)
   }
-
-  private def canBuild(building: Building, gameState: GameState) : Boolean = {
-    gameState.activePlayerState.ore >= building.costToBuild &&
-      gameState.activePlayerState.population >= 1
-  }
-
-  def generateResearchedDerivedPlayerState(building: Building, gameState: GameState): DerivedPlayerState = {
-    val actions: Map[ActionId, Action] = {
-      if (Building.canBuild(building, gameState)) {
-        val buildAction: Action = new Action {
-          override def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty.copy(
-            newBuildings = List(building),
-            population = -1,
-            ore = -building.costToBuild
-          )
-        }
-        Map(ActionId("build" + building.prettyName) -> buildAction)
-      }
-      else {
-        Map.empty
-      }
-    }
-
-    DerivedPlayerState.empty.copy(
-      actions = actions
-    )
-  }
-
 }
 
 trait Mine

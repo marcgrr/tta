@@ -21,9 +21,7 @@ class GameStateResource @Inject() () extends Controller {
     PlayerIndex(0),
     Map(
       PlayerIndex(0) -> PlayerState.newPlayerState,
-      PlayerIndex(1) -> PlayerState.newPlayerState
-    )
-  )
+      PlayerIndex(1) -> PlayerState.newPlayerState))
 
   def get = Action {
     Ok(makeResponse(gameState))
