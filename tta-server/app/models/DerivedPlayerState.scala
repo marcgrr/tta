@@ -27,8 +27,8 @@ object DerivedPlayerState {
   implicit val format: OFormat[DerivedPlayerState] = Json.format[DerivedPlayerState]
 
   val empty: DerivedPlayerState = DerivedPlayerState(
-      actions = Map.empty,
-      orePerTurn = 0,
-      foodPerTurn = 0,
-      sciencePerTurn = 0)
+    actions = Map.empty,
+    orePerTurn = 0,
+    foodPerTurn = 0,
+    sciencePerTurn = 0)
 }
