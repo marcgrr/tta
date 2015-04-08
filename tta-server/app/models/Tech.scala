@@ -17,7 +17,7 @@ trait Tech extends Card {
   def generateResearchedDerivedPlayerState(gameState: GameState): DerivedPlayerState
 
   override def generatePlayActionDerivedPlayerState(gameState:GameState): DerivedPlayerState = {
-    def tech = this
+    val tech = this
     val actions: Map[ActionId, Action] = {
       if (tech.canResearch(gameState)) {
         val researchAction: Action = new Action {

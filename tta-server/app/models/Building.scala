@@ -16,7 +16,7 @@ trait Building extends Tech {
   }
 
   override def generateResearchedDerivedPlayerState(gameState: GameState): DerivedPlayerState = {
-    def building = this
+    val building = this
     val actions: Map[ActionId, Action] = {
       if (building.canBuild(gameState)) {
         val buildAction: Action = new Action {

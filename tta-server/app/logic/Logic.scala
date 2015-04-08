@@ -43,10 +43,10 @@ object Logic {
   def updatePlayerStateAtEndOfTurn(
       playerState: PlayerState,
       derivedPlayerState: DerivedPlayerState): PlayerState = {
-        playerState.copy(
-          ore = playerState.ore + derivedPlayerState.orePerTurn,
-          food = playerState.food + derivedPlayerState.foodPerTurn,
-          science = playerState.science + derivedPlayerState.sciencePerTurn)
+    playerState.copy(
+      ore = playerState.ore + derivedPlayerState.orePerTurn,
+      food = playerState.food + derivedPlayerState.foodPerTurn,
+      science = playerState.science + derivedPlayerState.sciencePerTurn)
   }
 
 }
