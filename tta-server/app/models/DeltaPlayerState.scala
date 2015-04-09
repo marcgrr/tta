@@ -12,7 +12,20 @@ case class DeltaPlayerState(
     population: Int,
     ore: Int,
     food: Int,
-    science: Int)
+    science: Int) {
+
+  def +(other: DeltaPlayerState): DeltaPlayerState = {
+    DeltaPlayerState(
+      newBuildings = newBuildings ++ other.newBuildings,
+      newTechs = newTechs ++ other.newTechs,
+      newCivilHand = newCivilHand ++ other.newCivilHand,
+      removedCivilHand = removedCivilHand ++ other.removedCivilHand,
+      population = population + other.population,
+      ore = ore + other.ore,
+      food = food + other.food,
+      science = science + other.science)
+  }
+}
 
 object DeltaPlayerState {
 

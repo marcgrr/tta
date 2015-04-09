@@ -7,7 +7,7 @@ import play.api.libs.json.OWrites
 import play.api.libs.json.Reads
 
 trait Action {
-  def doIt(gameState: GameState): DeltaPlayerState
+  def deltaPlayerState: DeltaPlayerState
 }
 
 object Action {
@@ -23,7 +23,7 @@ object Action {
   }
 
   val empty: Action = new Action {
-    def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty
+    def deltaPlayerState: DeltaPlayerState = DeltaPlayerState.empty
   }
 }
 

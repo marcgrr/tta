@@ -20,6 +20,41 @@ case class GameState(
   def updatedActivePlayerState(f: PlayerState => PlayerState): GameState = {
     copy(playerStates = playerStates.updated(activePlayerIndex, f(activePlayerState)))
   }
+
+  def getEndTurnActionForActivePlayer: Action = {
+
+    val gameState = this
+    new Action {
+      override def deltaPlayerState: DeltaPlayerState = {
+        gameState.activePlayerState.buildings.map { building =>
+          building.deltaPlayerStateAtEndTurnIfBuilt
+        }.foldLeft(DeltaPlayerState.empty)(_ + _)
+      }
+    }
+
+  }
+
+  def getActionsForActivePlayer: Map[ActionId, Action] = {
+
+    // Generate valid play actions from civil cards in hand
+    val civilHandPlayActions = this.activePlayerState.civilHand.flatMap { card =>
+      card.getPlayAction(this)
+    }.toMap
+
+    // Generate valid actions from techs that have been researched
+    val techResearchedActions = this.activePlayerState.techs.flatMap { tech =>
+      tech.getResearchedAction(this)
+    }.toMap
+
+    // Generate increase population action, if valid
+    val increasePopulationAction = Population.getIncreasePopulationAction(this)
+
+    // Pool everything together
+    val allActions: Map[ActionId, Action] = civilHandPlayActions ++ techResearchedActions ++ increasePopulationAction
+
+    allActions
+
+  }
 }
 
 object GameState {

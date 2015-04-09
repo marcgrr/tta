@@ -8,7 +8,7 @@ import play.api.libs.json.Writes
 
 trait Card {
   def prettyName: String
-  def generatePlayActionDerivedPlayerState(gameState:GameState): DerivedPlayerState
+  def getPlayAction(gameState:GameState): Option[(ActionId, Action)]
 }
 
 object Card {

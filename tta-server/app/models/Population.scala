@@ -11,22 +11,19 @@ object Population {
     gameState.activePlayerState.food >= costToIncrease(gameState)
   }
 
-  def generateIncreasePopulationActionDerivedPlayerState(gameState: GameState): DerivedPlayerState = {
+  def getIncreasePopulationAction(gameState: GameState): Option[(ActionId, Action)] = {
 
-    val actions: Map[ActionId, Action] = {
-      if (Population.canIncrease(gameState)) {
-        val increasePopulationAction: Action = new Action {
-          override def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty.copy(
-            population = 1,
-            food = -costToIncrease(gameState))
-        }
-        Map(ActionId("increasePopulation") -> increasePopulationAction)
-      } else {
-        Map.empty
+    if (Population.canIncrease(gameState)) {
+      val increasePopulationAction: Action = new Action {
+        override def deltaPlayerState: DeltaPlayerState = DeltaPlayerState.empty.copy(
+          population = 1,
+          food = -costToIncrease(gameState))
       }
+      Some(ActionId("increasePopulation") -> increasePopulationAction)
+    } else {
+      None
     }
 
-    DerivedPlayerState.empty.copy(actions = actions)
   }
 
 }
