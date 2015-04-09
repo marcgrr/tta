@@ -17,8 +17,8 @@ case class GameState(
     playerStates(activePlayerIndex)
   }
 
-  def updatedActivePlayerState(f: PlayerState => PlayerState): GameState = {
-    copy(playerStates = playerStates.updated(activePlayerIndex, f(activePlayerState)))
+  def updatedActivePlayerState(playerState: PlayerState): GameState = {
+    copy(playerStates = playerStates.updated(activePlayerIndex, playerState))
   }
 
   def getEndTurnActionForActivePlayer: Action = {

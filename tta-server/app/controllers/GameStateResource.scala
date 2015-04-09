@@ -34,14 +34,14 @@ class GameStateResource @Inject() () extends Controller {
   def runAction(actionIdString: String) = Action {
     val actionId = ActionId(actionIdString)
     val action = gameState.getActionsForActivePlayer(actionId)
-    gameState = gameState.updatedActivePlayerState(DeltaPlayerState.applyDeltaPlayerState(action.deltaPlayerState))
+    gameState = gameState.updatedActivePlayerState(action.deltaPlayerState.applyDeltaPlayerState(activePlayerState))
 
     Ok(makeResponse(gameState))
   }
 
   def endTurn = Action {
     gameState = gameState.updatedActivePlayerState(
-      DeltaPlayerState.applyDeltaPlayerState(gameState.getEndTurnActionForActivePlayer.deltaPlayerState)).copy(
+      gameState.getEndTurnActionForActivePlayer.deltaPlayerState.applyDeltaPlayerState(activePlayerState)).copy(
       activePlayerIndex = gameState.activePlayerIndex.incrementMod(gameState.playerStates.size))
 
     Ok(makeResponse(gameState))
