@@ -6,6 +6,7 @@ import javax.inject.Singleton
 import logic.Logic
 import models.ActionId
 import models.DeltaPlayerState
+import models.DerivedGameState
 import models.GameState
 import models.PlayerIndex
 import models.PlayerState
@@ -18,9 +19,7 @@ import play.api.mvc.Controller
 @Singleton
 class GameStateResource @Inject() () extends Controller {
 
-  def derivedGameState = Logic.deriveGameState(gameState)
   def activePlayerState = gameState.activePlayerState
-  def activePlayerDerivedState = derivedGameState.derivedPlayerStates(gameState.activePlayerIndex)
 
   var gameState = GameState(
     PlayerIndex(0),
@@ -34,24 +33,22 @@ class GameStateResource @Inject() () extends Controller {
 
   def runAction(actionIdString: String) = Action {
     val actionId = ActionId(actionIdString)
-    val action = activePlayerDerivedState.actions(actionId)
-    gameState = gameState.updatedActivePlayerState(DeltaPlayerState.applyDeltaPlayerState(action.doIt(gameState)))
+    val action = gameState.getActionsForActivePlayer(actionId)
+    gameState = gameState.updatedActivePlayerState(action.deltaPlayerState.applyDeltaPlayerState(activePlayerState))
+
     Ok(makeResponse(gameState))
   }
 
   def endTurn = Action {
-
-    val newActivePlayerState = Logic.updatePlayerStateAtEndOfTurn(activePlayerState, activePlayerDerivedState)
-
-    gameState = gameState.copy(
-      activePlayerIndex = gameState.activePlayerIndex.incrementMod(gameState.playerStates.size),
-      playerStates = gameState.playerStates.updated(gameState.activePlayerIndex, newActivePlayerState))
+    gameState = gameState.updatedActivePlayerState(
+      gameState.getEndTurnActionForActivePlayer.deltaPlayerState.applyDeltaPlayerState(activePlayerState)).copy(
+      activePlayerIndex = gameState.activePlayerIndex.incrementMod(gameState.playerStates.size))
 
     Ok(makeResponse(gameState))
   }
 
   private[this] def makeResponse(gameState: GameState): JsValue = {
-    val derivedGameState = Logic.deriveGameState(gameState)
+    val derivedGameState = DerivedGameState(activePlayerActions = gameState.getActionsForActivePlayer)
     Json.obj(
       "gameState" -> gameState,
       "derivedGameState" -> derivedGameState)

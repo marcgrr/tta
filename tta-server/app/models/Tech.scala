@@ -14,25 +14,22 @@ trait Tech extends Card {
       !gameState.activePlayerState.techs.contains(this)
   }
 
-  def generateResearchedDerivedPlayerState(gameState: GameState): DerivedPlayerState
+  def getResearchedAction(gameState: GameState): Option[(ActionId, Action)]
 
-  override def generatePlayActionDerivedPlayerState(gameState:GameState): DerivedPlayerState = {
+  override def getPlayAction(gameState:GameState): Option[(ActionId, Action)] = {
     val tech = this
-    val actions: Map[ActionId, Action] = {
-      if (tech.canResearch(gameState)) {
-        val researchAction: Action = new Action {
-          override def doIt(gameState: GameState): DeltaPlayerState = DeltaPlayerState.empty.copy(
-            newTechs = List(tech),
-            science = -tech.costToResearch,
-            removedCivilHand = List(tech))
-        }
-        Map(ActionId("research" + tech.prettyName) -> researchAction)
-      } else {
-        Map.empty
+    if (tech.canResearch(gameState)) {
+      val researchAction: Action = new Action {
+        override def deltaPlayerState: DeltaPlayerState = DeltaPlayerState.empty.copy(
+          newTechs = List(tech),
+          science = -tech.costToResearch,
+          removedCivilHand = List(tech))
       }
+      Some(ActionId("research" + tech.prettyName) -> researchAction)
+    } else {
+      None
     }
 
-    DerivedPlayerState.empty.copy(actions = actions)
   }
 
 }
