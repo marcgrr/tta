@@ -33,10 +33,10 @@ import scala.reflect.runtime.universe.Type
  *   object Root {
  *     implicit leafyFormat: LeafyFormat[Root] = LeafyFormat
  *       .root[Root]
- *       .leaf[Leaf1]
- *       .leaf[Leaf2]
+ *       .leaf[Leaf1.type]
+ *       .leaf[Leaf2.type]
  *       ...
- *       .leaf[LeafN]
+ *       .leaf[LeafN.type]
  *   }
  * }}}
  *
