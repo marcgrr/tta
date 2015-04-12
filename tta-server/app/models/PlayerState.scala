@@ -1,5 +1,12 @@
 package models
 
+import models.cards.Agriculture
+import models.cards.Bronze
+import models.cards.Building
+import models.cards.Card
+import models.cards.Iron
+import models.cards.Philosophy
+import models.cards.Tech
 import play.api.libs.json.Json
 import play.api.libs.json.OFormat
 
@@ -17,9 +24,9 @@ case class PlayerState(
 object PlayerState {
   implicit val format: OFormat[PlayerState] = Json.format[PlayerState]
   val newPlayerState: PlayerState = PlayerState(
-    buildings = List(Bronze(0), Bronze(0), Agriculture(0), Agriculture(0), Philosophy(0)),
-    techs = List(Bronze(0), Agriculture(0), Philosophy(0)),
-    civilHand = List(Iron(0)),
+    buildings = List(Bronze, Bronze, Agriculture, Agriculture, Philosophy),
+    techs = List(Bronze, Agriculture, Philosophy),
+    civilHand = List(Iron),
     population = 0,
     ore = 2,
     food = 2,
