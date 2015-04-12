@@ -1,10 +1,11 @@
-package models
+package models.cards
 
-import play.api.libs.json.Format
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.JsString
-import play.api.libs.json.Reads
-import play.api.libs.json.Writes
+import models.Action
+import models.ActionId
+import models.DeltaPlayerState
+import models.DerivedPlayerState
+import models.GameState
+import util.LeafyFormat
 
 trait Tech extends Card {
   def costToResearch: Int
@@ -38,10 +39,5 @@ trait Tech extends Card {
 }
 
 object Tech {
-  implicit val format: Format[Tech] = {
-    val writes = Writes { o: Tech => JsString(o.prettyName) }
-    val reads = Reads { json => JsSuccess(Bronze(0) : Tech) }
-    //TODO: Make it read something sensible
-    Format(reads, writes)
-  }
+  implicit val leafyFormat: LeafyFormat[Tech] = LeafyFormat.middle[Tech, Card]
 }

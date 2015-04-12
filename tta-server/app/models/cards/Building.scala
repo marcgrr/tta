@@ -1,10 +1,12 @@
-package models
+package models.cards
 
-import play.api.libs.json.Format
-import play.api.libs.json.JsString
-import play.api.libs.json.JsSuccess
-import play.api.libs.json.Reads
-import play.api.libs.json.Writes
+import models.Action
+import models.ActionId
+import models.DeltaPlayerState
+import models.DerivedPlayerState
+import models.GameState
+import util.LeafFormat
+import util.LeafyFormat
 
 trait Building extends Tech {
   def derivePlayerState(gameState: GameState): DerivedPlayerState
@@ -36,18 +38,12 @@ trait Building extends Tech {
 }
 
 object Building {
-  implicit val format: Format[Building] = {
-    val writes = Writes { o: Building => JsString(o.prettyName) }
-    val reads = Reads { json => JsSuccess(Bronze(0) : Building) }
-    //TODO: Make it read something sensible
-    Format(reads, writes)
-  }
+  implicit val leafyFormat: LeafyFormat[Building] = LeafyFormat.middle[Building, Card]
 }
 
 trait Mine
 
-case class Bronze(foo: Int) extends Building with Mine {
-
+case object Bronze extends Building with Mine {
   override val prettyName = "Bronze"
   override val costToBuild: Int = 2
   override val costToResearch: Int = 0
@@ -55,10 +51,11 @@ case class Bronze(foo: Int) extends Building with Mine {
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(orePerTurn = 1)
   }
+
+  implicit val leafFormat: LeafFormat[Bronze.type] = LeafyFormat.leaf(() => this, prettyName)
 }
 
-case class Iron(foo: Int) extends Building with Mine {
-
+case object Iron extends Building with Mine {
   override val prettyName = "Iron"
   override val costToBuild: Int = 5
   override val costToResearch: Int = 5
@@ -66,13 +63,13 @@ case class Iron(foo: Int) extends Building with Mine {
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(orePerTurn = 2)
   }
-}
 
+  implicit val leafFormat: LeafFormat[Iron.type] = LeafyFormat.leaf(() => this, prettyName)
+}
 
 trait Farm
 
-case class Agriculture(foo: Int) extends Building with Farm {
-
+case object Agriculture extends Building with Farm {
   override val prettyName = "Agriculture"
   override val costToBuild: Int = 2
   override val costToResearch: Int = 0
@@ -80,12 +77,13 @@ case class Agriculture(foo: Int) extends Building with Farm {
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(foodPerTurn = 1)
   }
-}
 
+  implicit val leafFormat: LeafFormat[Agriculture.type] = LeafyFormat.leaf(() => this, prettyName)
+}
 
 trait Lab
 
-case class Philosophy(foo: Int) extends Building with Lab {
+case object Philosophy extends Building with Lab {
   override val prettyName = "Philosophy"
   override val costToBuild: Int = 3
   override val costToResearch: Int = 0
@@ -93,4 +91,6 @@ case class Philosophy(foo: Int) extends Building with Lab {
   def derivePlayerState(gameState: GameState): DerivedPlayerState = {
     DerivedPlayerState.empty.copy(sciencePerTurn = 1)
   }
+
+  implicit val leafFormat: LeafFormat[Philosophy.type] = LeafyFormat.leaf(() => this, prettyName)
 }
